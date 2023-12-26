@@ -4,6 +4,29 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <UserSecretsId>c323ec7d-79b4-462c-bc67-add5acf03285</UserSecretsId>
+    <Version>1.0.0</Version>
+    <Authors>boris.tomas@gmail.com</Authors>
+    <RepositoryUrl>https://github.com/boristomas/StoredValue</RepositoryUrl>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Title>Stored Value</Title>
+    <Description>Simple class for storing variable values on various places, currently in memory or on permanent storage (disk).
+Icon by: https://www.flaticon.com/authors/parzival-1997</Description>
+    <PackageProjectUrl>https://github.com/boristomas/StoredValue</PackageProjectUrl>
+    <PackageIcon>filter.png</PackageIcon>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>variable; permanent storage</PackageTags>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="C:\Users\boris\OneDrive\Desktop\filter.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="5.0.0" />
+  </ItemGroup>
 
 </Project>
