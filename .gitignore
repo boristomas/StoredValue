@@ -1,4 +1,4 @@
-﻿# Build results
+# Build results
 [Dd]ebug/
 [Rr]elease/
 x64/
@@ -76,16 +76,9 @@ AppPackages/
 *.7z
 *.scc
 
-.vs/StoredValue/FileContentIndex/
 
-bin/Debug/net6.0/
 
-obj/Debug/net6.0/ref/
-
-obj/Debug/net6.0/refint/
-
-.vs/StoredValue/DesignTimeBuild/
-
-obj/Debug/net6.0/
-
+bin/
+.vs/
 obj/
+

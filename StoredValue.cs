@@ -15,8 +15,8 @@ namespace Extras
 
     public class StoredValue<T>
     {
-        private string FileName = null;
-        private string DesiredFilename = null;
+        private string FileName;
+        private string DesiredFilename;
         private bool IsDirty = true;
         public enum Location
         {
