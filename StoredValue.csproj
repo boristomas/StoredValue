@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
@@ -19,7 +19,8 @@ Icon by: https://www.flaticon.com/authors/parzival-1997</Description>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="C:\Users\boris\OneDrive\Desktop\filter.png">
+    <None Include=".github\workflows\nuget-publish.yml" />
+    <None Include="filter.png">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
