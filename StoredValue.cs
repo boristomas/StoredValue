@@ -1,39 +1,56 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Reflection;
-using System.Linq.Expressions;
-using System.Runtime.CompilerServices;
-using System.Diagnostics;
-
-namespace Extras
+﻿namespace Extras
 {
 
     public class StoredValue<T>
     {
-        private string? FileName = null;
+        private string? FileName = "";
         private readonly string DesiredFilename;
         private bool IsDirty = true;
         private static readonly Newtonsoft.Json.JsonSerializer serializer = new();
         public enum Location
         {
             Local,
+            LocalPersistent,
             Cloud
         }
-        public Location location = Location.Local;
+        public Location location = Location.LocalPersistent;
         private T value;
+        private static bool IsConfigured = false;
+        private static string LocalStoragePath = "";
 
-        public StoredValue(string name, T initialValue, Location location)
+        public static void SetConfig(string localStoragePath, string CloudAPIKey)
         {
-            if (!Directory.Exists(AppDomain.CurrentDomain.BaseDirectory + $"\\StoredValues"))
+            if (string.IsNullOrEmpty(localStoragePath))
             {
-                Directory.CreateDirectory(AppDomain.CurrentDomain.BaseDirectory + $"\\StoredValues");
+                LocalStoragePath = AppDomain.CurrentDomain.BaseDirectory + $"\\StoredValues";
             }
+            if (!Directory.Exists(localStoragePath))
+            {
+                try
+                {
+                    Directory.CreateDirectory(localStoragePath);
+                    LocalStoragePath = localStoragePath;
+                }
+                catch (Exception e)
+                {
+                    IsConfigured = false;
+                    throw new Exception("Could not create directory for StoredValues. " + e.Message);
+                }
+            }
+            else
+            {
+                LocalStoragePath = localStoragePath;
+            }
+            IsConfigured = true;
+        }
 
+        public StoredValue(string name, T initialValue, Location location= Location.Local)
+        {
+            if (IsConfigured == false)
+            {
+                throw new Exception("StoredValue is not configured. Call StoredValue.SetConfig() at least once before using.");
+            }
+          
             DesiredFilename = name;
             value = initialValue;
             IsDirty = true;
@@ -44,13 +61,19 @@ namespace Extras
         {
             get
             {
-                if (location == Location.Local)
+                if (location == Location.LocalPersistent)
                 {
                     if (IsDirty)
                     {
                         Stream ReadFileStream = File.OpenRead(GetFilename());
+                        if (ReadFileStream.Length == 0)
+                        {
+                            IsDirty = false;
+                            ReadFileStream.Close();
+                            ForceSave();
+                            return value;
+                        }
                         StreamReader reader = new(ReadFileStream);
-
                         Newtonsoft.Json.JsonTextReader jsonReader = new(reader);
                         value = serializer.Deserialize<T>(jsonReader);
                         jsonReader.Close();
@@ -62,14 +85,12 @@ namespace Extras
                 else
                 {
                     //location is cloud
-
                 }
-
                 return value;
             }
             set
             {
-                if (location == Location.Local)
+                if (location == Location.LocalPersistent)
                 {
                     //store value only if value is new
                     
@@ -95,11 +116,10 @@ namespace Extras
         }
         public void ForceSave()
         {
-            if (location == Location.Local)
+            if (location == Location.LocalPersistent)
             {
                 if (File.Exists(GetFilename()) == false)
                 {
-                   
                     var file = File.Create(GetFilename());
                     file.Close();
                 }
@@ -121,16 +141,16 @@ namespace Extras
         }
         private string GetFilename()
         {
+          
             if (string.IsNullOrEmpty(FileName))
             {
                
-                if (File.Exists(AppDomain.CurrentDomain.BaseDirectory + $"\\StoredValues\\{DesiredFilename}.StoredValue") == false)
+                if (!File.Exists(LocalStoragePath + $"\\{DesiredFilename}.StoredValue"))
                 {
-                    var file = File.Create(AppDomain.CurrentDomain.BaseDirectory + $"\\StoredValues\\{DesiredFilename}.StoredValue");
+                    FileName = LocalStoragePath + $"\\{DesiredFilename}.StoredValue";
+                    var file = File.Create(FileName);
                     file.Close();
                 }
-
-                FileName = AppDomain.CurrentDomain.BaseDirectory + $"\\StoredValues\\{DesiredFilename}.StoredValue";
             }
             return FileName;
         }
