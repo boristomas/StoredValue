@@ -1,12 +1,15 @@
-﻿namespace Extras
+﻿using System;
+using System.IO;
+
+namespace Extras
 {
 
     public class StoredValue<T>
     {
-        private string? FileName = "";
+        private string FileName = "";
         private readonly string DesiredFilename;
         private bool IsDirty = true;
-        private static readonly Newtonsoft.Json.JsonSerializer serializer = new();
+        private static readonly Newtonsoft.Json.JsonSerializer serializer = new Newtonsoft.Json.JsonSerializer();
         public enum Location
         {
             Local,
@@ -73,8 +76,8 @@
                             ForceSave();
                             return value;
                         }
-                        StreamReader reader = new(ReadFileStream);
-                        Newtonsoft.Json.JsonTextReader jsonReader = new(reader);
+                        StreamReader reader = new StreamReader(ReadFileStream);
+                        Newtonsoft.Json.JsonTextReader jsonReader = new Newtonsoft.Json.JsonTextReader(reader);
                         value = serializer.Deserialize<T>(jsonReader);
                         jsonReader.Close();
                         reader.Close();
@@ -99,7 +102,7 @@
                        
                         Stream SaveFileStream = File.Create(GetFilename());
                         StreamWriter writer = new StreamWriter(SaveFileStream);
-                        Newtonsoft.Json.JsonTextWriter jsonWriter = new(writer);
+                        Newtonsoft.Json.JsonTextWriter jsonWriter = new Newtonsoft.Json.JsonTextWriter(writer);
                         serializer.Serialize(jsonWriter, value);
                         jsonWriter.Close();
                         writer.Close();
@@ -126,7 +129,7 @@
 
                 Stream SaveFileStream = File.Create(GetFilename());
                 StreamWriter writer = new StreamWriter(SaveFileStream);
-                Newtonsoft.Json.JsonTextWriter jsonWriter = new(writer);
+                Newtonsoft.Json.JsonTextWriter jsonWriter = new Newtonsoft.Json.JsonTextWriter(writer);
                 serializer.Serialize(jsonWriter, value);
                 jsonWriter.Close();
                 writer.Close();

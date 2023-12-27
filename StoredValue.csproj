@@ -1,11 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
+    <TargetFrameworks>netstandard2.0;net45;net48;net6.0;net8.0</TargetFrameworks>
     <Nullable>enable</Nullable>
     <UserSecretsId>c323ec7d-79b4-462c-bc67-add5acf03285</UserSecretsId>
-    <Version>1.0.4</Version>
+    <Version>1.0.6</Version>
     <Authors>boris.tomas@gmail.com</Authors>
     <RepositoryUrl>https://github.com/boristomas/StoredValue</RepositoryUrl>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
@@ -17,6 +16,7 @@
     <PackageTags>variable; permanent storage</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <LangVersion>8.0</LangVersion>
     
   </PropertyGroup>
 
@@ -31,7 +31,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="5.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     
   </ItemGroup>
