@@ -15,9 +15,10 @@ namespace Extras
 
     public class StoredValue<T>
     {
-        private string FileName;
-        private string DesiredFilename;
+        private string? FileName = null;
+        private readonly string DesiredFilename;
         private bool IsDirty = true;
+        private static readonly Newtonsoft.Json.JsonSerializer serializer = new();
         public enum Location
         {
             Local,
@@ -28,6 +29,11 @@ namespace Extras
 
         public StoredValue(string name, T initialValue, Location location)
         {
+            if (!Directory.Exists(AppDomain.CurrentDomain.BaseDirectory + $"\\StoredValues"))
+            {
+                Directory.CreateDirectory(AppDomain.CurrentDomain.BaseDirectory + $"\\StoredValues");
+            }
+
             DesiredFilename = name;
             value = initialValue;
             IsDirty = true;
@@ -40,12 +46,16 @@ namespace Extras
             {
                 if (location == Location.Local)
                 {
-                    if (IsDirty && File.Exists(getFilename()))
+                    if (IsDirty)
                     {
-                        Stream openFileStream = File.OpenRead(getFilename());
-                        BinaryFormatter deserializer = new BinaryFormatter();
-                        value = (T)deserializer.Deserialize(openFileStream);
-                        openFileStream.Close();
+                        Stream ReadFileStream = File.OpenRead(GetFilename());
+                        StreamReader reader = new(ReadFileStream);
+
+                        Newtonsoft.Json.JsonTextReader jsonReader = new(reader);
+                        value = serializer.Deserialize<T>(jsonReader);
+                        jsonReader.Close();
+                        reader.Close();
+                        ReadFileStream.Close();
                         IsDirty = false;
                     }
                 }
@@ -62,12 +72,16 @@ namespace Extras
                 if (location == Location.Local)
                 {
                     //store value only if value is new
-                    if (!this.value.Equals(value))
+                    
+                    if (this.value != null && !this.value.Equals(value))
                     {
-                        Directory.CreateDirectory(AppDomain.CurrentDomain.BaseDirectory + $"\\StoredValues");
-                        Stream SaveFileStream = File.Create(getFilename());
-                        BinaryFormatter serializer = new BinaryFormatter();
-                        serializer.Serialize(SaveFileStream, value);
+                       
+                        Stream SaveFileStream = File.Create(GetFilename());
+                        StreamWriter writer = new StreamWriter(SaveFileStream);
+                        Newtonsoft.Json.JsonTextWriter jsonWriter = new(writer);
+                        serializer.Serialize(jsonWriter, value);
+                        jsonWriter.Close();
+                        writer.Close();
                         SaveFileStream.Close();
                         this.value = value;
                     }
@@ -83,16 +97,19 @@ namespace Extras
         {
             if (location == Location.Local)
             {
-                if (File.Exists(getFilename()) == false)
+                if (File.Exists(GetFilename()) == false)
                 {
-                    Directory.CreateDirectory(AppDomain.CurrentDomain.BaseDirectory + $"\\StoredValues");
-                    var file = File.Create(getFilename());
+                   
+                    var file = File.Create(GetFilename());
                     file.Close();
                 }
 
-                Stream SaveFileStream = File.Create(getFilename());
-                BinaryFormatter serializer = new BinaryFormatter();
-                serializer.Serialize(SaveFileStream, value);
+                Stream SaveFileStream = File.Create(GetFilename());
+                StreamWriter writer = new StreamWriter(SaveFileStream);
+                Newtonsoft.Json.JsonTextWriter jsonWriter = new(writer);
+                serializer.Serialize(jsonWriter, value);
+                jsonWriter.Close();
+                writer.Close();
                 SaveFileStream.Close();
             }
             else
@@ -102,10 +119,17 @@ namespace Extras
             //if file does not exist, create it
 
         }
-        private string getFilename()
+        private string GetFilename()
         {
-            if (FileName == null)
+            if (string.IsNullOrEmpty(FileName))
             {
+               
+                if (File.Exists(AppDomain.CurrentDomain.BaseDirectory + $"\\StoredValues\\{DesiredFilename}.StoredValue") == false)
+                {
+                    var file = File.Create(AppDomain.CurrentDomain.BaseDirectory + $"\\StoredValues\\{DesiredFilename}.StoredValue");
+                    file.Close();
+                }
+
                 FileName = AppDomain.CurrentDomain.BaseDirectory + $"\\StoredValues\\{DesiredFilename}.StoredValue";
             }
             return FileName;
