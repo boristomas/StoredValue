@@ -66,8 +66,14 @@
                     if (IsDirty)
                     {
                         Stream ReadFileStream = File.OpenRead(GetFilename());
+                        if (ReadFileStream.Length == 0)
+                        {
+                            IsDirty = false;
+                            ReadFileStream.Close();
+                            ForceSave();
+                            return value;
+                        }
                         StreamReader reader = new(ReadFileStream);
-
                         Newtonsoft.Json.JsonTextReader jsonReader = new(reader);
                         value = serializer.Deserialize<T>(jsonReader);
                         jsonReader.Close();
@@ -79,9 +85,7 @@
                 else
                 {
                     //location is cloud
-
                 }
-
                 return value;
             }
             set
@@ -116,7 +120,6 @@
             {
                 if (File.Exists(GetFilename()) == false)
                 {
-                   
                     var file = File.Create(GetFilename());
                     file.Close();
                 }

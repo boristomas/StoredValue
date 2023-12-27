@@ -18,5 +18,8 @@ jobs:
     - name: Build
       run: dotnet build --configuration Release
     - name: Publish
-      run: dotnet nuget push **/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://nuget.pkg.github.com/boristomas/index.json
+      run: dotnet nuget push **/*.nupkg --api-key ${{ secrets.GH_API_KEY }} --source https://nuget.pkg.github.com/boristomas/index.json
+    - name: PublishNuget
+      run: dotnet nuget push **/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
+
 
