@@ -21,7 +21,7 @@ namespace Extras
         private static bool IsConfigured = false;
         private static string LocalStoragePath = "";
 
-        public static void SetConfig(string localStoragePath, string CloudAPIKey)
+        public static void SetConfig(string localStoragePath="", string CloudAPIKey="")
         {
             if (string.IsNullOrEmpty(localStoragePath))
             {
