@@ -144,10 +144,8 @@ namespace Extras
         }
         private string GetFilename()
         {
-          
             if (string.IsNullOrEmpty(FileName))
             {
-               
                 if (!File.Exists(LocalStoragePath + $"\\{DesiredFilename}.StoredValue"))
                 {
                     FileName = LocalStoragePath + $"\\{DesiredFilename}.StoredValue";
