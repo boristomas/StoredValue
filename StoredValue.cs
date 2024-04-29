@@ -146,9 +146,9 @@ namespace Extras
         {
             if (string.IsNullOrEmpty(FileName))
             {
+                FileName = LocalStoragePath + $"\\{DesiredFilename}.StoredValue";
                 if (!File.Exists(LocalStoragePath + $"\\{DesiredFilename}.StoredValue"))
                 {
-                    FileName = LocalStoragePath + $"\\{DesiredFilename}.StoredValue";
                     var file = File.Create(FileName);
                     file.Close();
                 }
