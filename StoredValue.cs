@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using static Extras.StoredValue;
 
@@ -14,7 +14,7 @@ namespace Extras
             LocalPersistent,
             Cloud
         }
-        public static void SetConfig(string localStoragePath, string CloudAPIKey)
+        public static void SetConfig(string localStoragePath="", string CloudAPIKey="")
         {
             if (string.IsNullOrEmpty(localStoragePath))
             {
