@@ -1,31 +1,24 @@
 ﻿using System;
 using System.IO;
+using static Extras.StoredValue;
 
 namespace Extras
 {
-
-    public class StoredValue<T>
+    public class StoredValue
     {
-        private string FileName = "";
-        private readonly string DesiredFilename;
-        private bool IsDirty = true;
-        private static readonly Newtonsoft.Json.JsonSerializer serializer = new Newtonsoft.Json.JsonSerializer();
+        protected static bool IsConfigured = false;
+        protected static string LocalStoragePath = "";
         public enum Location
         {
             Local,
             LocalPersistent,
             Cloud
         }
-        public Location location = Location.LocalPersistent;
-        private T value;
-        private static bool IsConfigured = false;
-        private static string LocalStoragePath = "";
-
         public static void SetConfig(string localStoragePath, string CloudAPIKey)
         {
             if (string.IsNullOrEmpty(localStoragePath))
             {
-                LocalStoragePath = AppDomain.CurrentDomain.BaseDirectory + $"\\StoredValues";
+                LocalStoragePath = AppDomain.CurrentDomain.BaseDirectory + $"StoredValues";
             }
             if (!Directory.Exists(localStoragePath))
             {
@@ -46,22 +39,42 @@ namespace Extras
             }
             IsConfigured = true;
         }
-
-        public StoredValue(string name, T initialValue, Location location= Location.Local)
+        public static void PurgeAll()
         {
-            if (IsConfigured == false)
+            if (IsConfigured)
+            {
+                Directory.Delete(LocalStoragePath, true);
+                Directory.CreateDirectory(LocalStoragePath);
+            }
+        }
+    }
+    public class StoredValue<T> : StoredValue
+    {
+        private string FileName = "";
+        private readonly string DesiredFilename;
+        private bool IsDirty = true;
+        private static readonly Newtonsoft.Json.JsonSerializer serializer = new Newtonsoft.Json.JsonSerializer();
+
+        public Location location = Location.LocalPersistent;
+        private T value;
+
+        public StoredValue(string name, T initialValue, Location location = Location.Local)
+        {
+            if (StoredValue.IsConfigured == false)
             {
                 throw new Exception("StoredValue is not configured. Call StoredValue.SetConfig() at least once before using.");
             }
-          
+
             DesiredFilename = name;
             value = initialValue;
             IsDirty = true;
             this.location = location;
         }
+        
 
         public T Value
         {
+            
             get
             {
                 if (location == Location.LocalPersistent)
@@ -96,10 +109,10 @@ namespace Extras
                 if (location == Location.LocalPersistent)
                 {
                     //store value only if value is new
-                    
+
                     if (this.value != null && !this.value.Equals(value))
                     {
-                       
+
                         Stream SaveFileStream = File.Create(GetFilename());
                         StreamWriter writer = new StreamWriter(SaveFileStream);
                         Newtonsoft.Json.JsonTextWriter jsonWriter = new Newtonsoft.Json.JsonTextWriter(writer);
@@ -115,6 +128,23 @@ namespace Extras
                     //location is cloud
 
                 }
+            }
+        }
+        /// <summary>
+        /// Purges the stored value
+        /// </summary>
+        public void Purge()
+        {
+            if (location == Location.LocalPersistent)
+            {
+                if (File.Exists(GetFilename()))
+                {
+                    File.Delete(GetFilename());
+                }
+            }
+            else
+            {
+                //location is cloud
             }
         }
         public void ForceSave()
@@ -144,13 +174,11 @@ namespace Extras
         }
         private string GetFilename()
         {
-          
             if (string.IsNullOrEmpty(FileName))
             {
-               
+                FileName = LocalStoragePath + $"\\{DesiredFilename}.StoredValue";
                 if (!File.Exists(LocalStoragePath + $"\\{DesiredFilename}.StoredValue"))
                 {
-                    FileName = LocalStoragePath + $"\\{DesiredFilename}.StoredValue";
                     var file = File.Create(FileName);
                     file.Close();
                 }
